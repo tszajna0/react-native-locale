@@ -39,14 +39,19 @@ public class RCTLocaleModule extends ReactContextBaseJavaModule {
 
         Locale current = getLocale();
         DecimalFormatSymbols formatterSymbols = getDecimalFormat().getDecimalFormatSymbols();
-        Currency currency = Currency.getInstance(current);
 
         final Map<String, Object> constants = new HashMap<>();
         constants.put("localeIdentifier", current.toString());
         constants.put("decimalSeparator", String.valueOf(formatterSymbols.getDecimalSeparator()));
         constants.put("groupingSeparator", String.valueOf(formatterSymbols.getGroupingSeparator()));
-        constants.put("currencySymbol", currency.getSymbol());
-        constants.put("currencyCode", currency.getCurrencyCode());
+
+        try {
+            Currency currency = Currency.getInstance(current);
+            constants.put("currencySymbol", currency.getSymbol());
+            constants.put("currencyCode", currency.getCurrencyCode());
+        } catch(IllegalArgumentException e) {
+            // Ignore; not all locale can produce valid currency (e.g. en => GBP, CAD, AUD, USD)
+        }
 
         final Map<String, String> formats = new HashMap<>();
         DateFormat dateFormatter;
